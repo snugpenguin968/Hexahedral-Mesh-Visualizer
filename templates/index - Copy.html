@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>ThreeJS Wireframe Rotation?!</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/96/three.min.js"></script>
+    <script src="/static/OrbitControls.js"></script>
+    <link rel="stylesheet" href="/static/css/main.css">
+    
+</head>
+
+<body>
+    <canvas></canvas>
+    
+
+</body>
+
+        <script>
+           
+            
+            var camera, scene, renderer, stats, windowHalfX = window.innerWidth / 2,
+                windowHalfY = window.innerHeight / 2,
+                mouseX = 0,
+                mouseY = 0;
+            init();
+            animate();
+            function init() {
+                camera = new THREE.PerspectiveCamera(25, window.innerWidth / window.innerHeight, 1, 2000);
+                camera.position.set(0, 0, 15);
+                scene = new THREE.Scene();
+                var edge_mat={{name|tojson}}; 
+                const material = new THREE.LineBasicMaterial( { color: 0xfffff } );
+                for(var x=0;x<edge_mat.length;x++){
+                    const points = [];
+                    temp_edge=edge_mat[x];
+                    start_v=temp_edge[0];
+                    end_v=temp_edge[1];
+                    points.push(new THREE.Vector3(start_v[0],start_v[1],start_v[2]));
+                    points.push(new THREE.Vector3(end_v[0],end_v[1],end_v[2]));
+                    const geometry = new THREE.BufferGeometry().setFromPoints( points );
+                    const line = new THREE.Line( geometry, material );
+                    scene.add( line );
+                }
+                
+                //renderer.render(scene,camera);
+                
+                renderer = new THREE.WebGLRenderer({ antialias: true, canvas: document.querySelector('canvas') });
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                controls = new THREE.OrbitControls( camera, renderer.domElement );
+                //window.addEventListener('mousemove', onDocumentMouseMove, false);
+                
+            }
+
+            function onWindowResize() {
+
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize( window.innerWidth, window.innerHeight );
+
+            }
+
+            function animate() {
+                requestAnimationFrame( animate );
+                controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+                render();
+            }
+
+            function render() {
+                //renderer.render( scene, camera );
+
+                
+
+                //render scene1
+                renderer.render(scene, camera);
+
+                //prevent canvas from being erased with next .render call
+                renderer.autoClear = false;
+
+                //just render scene2 on top of scene1
+                renderer.render(scene2, camera);
+            }
+            
+            
+
+
+        </script>
+    </body>
+</html>
