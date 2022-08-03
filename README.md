@@ -15,9 +15,8 @@ Polygon meshes are just a collection of vertices, edges, and faces that make up 
 ![image](https://user-images.githubusercontent.com/85849926/182731510-b563be80-3f5e-40d0-b4a4-61dc20f9cd8a.png)
 - There is a basic UI that allows the user to input their own hybrid files. The inputted files must be in the following format: 
   - The 1st line must contain the number of vertices, faces, and polyhedra. The next n_vertices lines contain 3 space-separated values that represent the x,y, and z coordinates of each vertex. 
-  - There are then n_faces lines. Each will first have a number *f* that represents how many vertices make up each face. 
-  - There are then *f* space separated values following *f* in the same line. 
-  - Finally, there are n_polyhedra lines. Each will first have a number *p* that represents how many faces make up each polyhedra. There are then *p* space separated values in the same line. 
+  - There are then n_faces lines. Each will first have a number *f* that represents how many vertices make up each face. *f* space separated values follow *f* in the same line. 
+  - Finally, there are n_polyhedra lines. Each will first have a number *p* that represents how many faces make up each polyhedra. *p* space separated values follow *p* in the same line. 
   - **See cube_twist.obj.HYBRID or fandisk-comp.obj.HYBRID** as examples. 
 
 
