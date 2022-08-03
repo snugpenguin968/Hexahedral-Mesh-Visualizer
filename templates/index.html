@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>ThreeJS Wireframe Rotation?!</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <script src="/static/OrbitControls.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            overflow:hidden;
+        }
+        *{
+            font-family: 'Open Sans', sans-serif;
+        }
+        input[type='file'] {
+            color: transparent;
+            }
+        
+        .tl{
+            float:left;
+            width:55%;
+            position:fixed;
+            
+            left:5%;
+            height:100%;
+            
+        }
+        .cr{
+            position:fixed;
+            float:right;
+            left:65%;
+            /*width:30%;*/
+           
+            top:5%;
+        }
+        .br{
+            float:right;
+            position:fixed;
+            /*width:30%;*/
+            left:65%;
+            top:40%;
+        }
+        .tr{
+            float:right;
+            position:fixed;
+            /*width:30%;*/
+            left:65%;
+            top:75%;
+
+        }
+        
+        .sidenav {
+            width: 130px;
+            position: fixed;
+            z-index: 1;
+            top: 20px;
+            left: 10px;
+            background: #eee;
+            overflow-x: hidden;
+            padding: 8px 0;
+            float:right;
+            left:90%;
+            top:40%;
+            }
+            .sidenav form{
+                padding: 6px 8px 6px 16px;
+                text-decoration: none;
+                font-size: 25px;
+                color: #2196F3;
+                display: block;
+            }
+    </style>
+</head>
+
+<body>
+    
+    <div class="sidenav" id="mySidebar" class="sidebar">
+        
+        <!--Send data from the uploaded file to the Python functions and generate new meshes-->
+        <form method="post" action="{{url_for('index')}}">
+            <label for="file" class="custom-uploader">Upload File</label>
+            <input id="file" type="file" name="fileToUpload">
+            <button type="submit" name="submit" class="btn btn-success">Submit</button>
+        </form>
+    </div>
+    
+    
+    <div class="container">
+      <p>
+        <span data-diagram="MainView" class="tl"></span>
+      </p>
+      <p>
+        <span data-diagram="TopRight" class="tr"></span> 
+      </p>
+      <p>
+        <span data-diagram="CenterRight" class="cr"></span> 
+      </p>
+      <p>
+        <span data-diagram="BottomRight" class="br"></span> 
+      </p>
+    </div>
+
+
+
+    <script  type="importmap">{
+      "imports": {
+          "three": "https://threejs.org/build/three.module.js"
+      }
+    }</script><!-- Remove this when import maps will be widely supported -->
+    <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+    <script type="module">
+        import * as THREE from 'three';
+        import {TrackballControls} from 'https://threejs.org/examples/jsm/controls/TrackballControls.js'; //This package allows us to zoom and drag the camera
+        
+        /*
+        Creates and renders all of the meshes
+        */
+        function main() {
+            //Create the canvas that the meshes are rendered on. 
+            const canvas = document.createElement('canvas');
+            const renderer = new THREE.WebGLRenderer({canvas, alpha: true});
+            renderer.setScissorTest(true);
+            var edge_mat={{name|tojson}}; //Read in the edge matrix from Python
+            const sceneElements = [];
+
+            /*
+            Create a 2D rendering context for each scene
+            Append its canvas to the element
+            */
+            function addScene(elem, fn) {
+                const ctx = document.createElement('canvas').getContext('2d');
+                elem.appendChild(ctx.canvas);
+                sceneElements.push({elem, ctx, fn});
+            }
+            /*
+            Set up the camera and zoom/click+drag functionality for each subview
+            */
+            function makeScene(elem) {
+                const scene = new THREE.Scene();
+                const fov = 45;
+                const aspect = 2;  // the canvas default
+                const near = 0.1;
+                const far = 5;
+                var camera = new THREE.PerspectiveCamera(25, window.innerWidth / window.innerHeight, 1, 2000);
+                camera.position.set(0, 0, 15); //How far away the camera is from the mesh
+                camera.lookAt(0, 0, 0);
+                scene.add(camera);
+
+                const controls = new TrackballControls(camera, elem); //Adds interactivity
+                controls.noZoom = false; //Enable zoom
+                controls.noPan = false; //Enable click+drag
+
+                {
+                const color = 0xFFFFFF;
+                const intensity = 1;
+                const light = new THREE.DirectionalLight(color, intensity); 
+                light.position.set(-1, 2, 4);
+                camera.add(light); //Keeps light relative to camera -> light shines on the side of the object we are looking at
+                }
+
+                return {scene, camera, controls};
+            }
+            /*
+            Create the meshes in each of the 4 subviews using the edge matrix. Each subview corresponds to an HTML span tag. 
+            */
+            const sceneInitFunctionsByName = {
+                //Left subview
+                'MainView': (elem) => {
+                const {scene, camera, controls} = makeScene(elem); //Each subview has its camera and controls
+                const material = new THREE.LineBasicMaterial( { color: 0xfffff } ); //Set light blue color
+                for(var x=0;x<edge_mat.length;x++){
+                        const points = [];
+                        var temp_edge=edge_mat[x]; //Iterate through the edge matrix and retrieve each edge
+                        var start_v=temp_edge[0]; //Start vertex of edge
+                        var end_v=temp_edge[1]; //End vertex of edge
+                        points.push(new THREE.Vector3(start_v[0],start_v[1],start_v[2])); //Define the coordinates of the start and end vertices
+                        points.push(new THREE.Vector3(end_v[0],end_v[1],end_v[2]));
+                        const geometry = new THREE.BufferGeometry().setFromPoints( points );
+                        const line = new THREE.Line( geometry, material ); //Create a line that connects the 2 vertices; this represents an edge
+                        scene.add( line );
+
+                        //Generate spheres centered at each vertex (Week 5 task)
+                        var sphere = new THREE.Mesh( new THREE.SphereGeometry( 0.05), new THREE.MeshLambertMaterial( { color: 0x000000, shading: THREE.FlatShading, overdraw: true, wireframe:false } ) );
+                        sphere.position.x=start_v[0];
+                        sphere.position.y=start_v[1];
+                        sphere.position.z=start_v[2];
+                        scene.add( sphere );
+                }
+                //Returns a scene render function
+                return (time, rect) => {
+                    camera.aspect = rect.width / rect.height;
+                    camera.updateProjectionMatrix();
+                    controls.handleResize();
+                    controls.update();
+                    renderer.render(scene, camera); 
+                };
+                },
+
+                //Top Right subview
+                'TopRight': (elem) => {
+                    const {scene, camera, controls} = makeScene(elem);
+                    const material = new THREE.LineBasicMaterial( { color: 0xfffff } );
+                    for(var x=0;x<edge_mat.length;x++){
+                            const points = [];
+                            var temp_edge=edge_mat[x];
+                            var start_v=temp_edge[0];
+                            var end_v=temp_edge[1];
+                            points.push(new THREE.Vector3(start_v[0],start_v[1],start_v[2]));
+                            points.push(new THREE.Vector3(end_v[0],end_v[1],end_v[2]));
+                            const geometry = new THREE.BufferGeometry().setFromPoints( points );
+                            const line = new THREE.Line( geometry, material );
+                            scene.add( line );
+                    }
+                    return (time, rect) => {
+                        camera.aspect = rect.width / rect.height;
+                        camera.updateProjectionMatrix();
+                        controls.handleResize();
+                        controls.update();
+                        renderer.render(scene, camera);
+                    };
+                },
+
+                //Center Right Subview
+                'CenterRight': (elem) => {
+                const {scene, camera, controls} = makeScene(elem);
+                const material = new THREE.LineBasicMaterial( { color: 0xfffff } );
+                for(var x=0;x<edge_mat.length;x++){
+                        const points = [];
+                        var temp_edge=edge_mat[x];
+                        var start_v=temp_edge[0];
+                        var end_v=temp_edge[1];
+                        points.push(new THREE.Vector3(start_v[0],start_v[1],start_v[2]));
+                        points.push(new THREE.Vector3(end_v[0],end_v[1],end_v[2]));
+                        const geometry = new THREE.BufferGeometry().setFromPoints( points );
+                        const line = new THREE.Line( geometry, material );
+                        scene.add( line );
+                }
+                return (time, rect) => {
+                    camera.aspect = rect.width / rect.height;
+                    camera.updateProjectionMatrix();
+                    controls.handleResize();
+                    controls.update();
+                    renderer.render(scene, camera);
+                };
+                },
+
+                //Bottom Right subview
+                'BottomRight': (elem) => {
+                const {scene, camera, controls} = makeScene(elem);
+                const material = new THREE.LineBasicMaterial( { color: 0xfffff } );
+                for(var x=0;x<edge_mat.length;x++){
+                        const points = [];
+                        var temp_edge=edge_mat[x];
+                        var start_v=temp_edge[0];
+                        var end_v=temp_edge[1];
+                        points.push(new THREE.Vector3(start_v[0],start_v[1],start_v[2]));
+                        points.push(new THREE.Vector3(end_v[0],end_v[1],end_v[2]));
+                        const geometry = new THREE.BufferGeometry().setFromPoints( points );
+                        const line = new THREE.Line( geometry, material );
+                        scene.add( line );
+                }
+                return (time, rect) => {
+                    camera.aspect = rect.width / rect.height;
+                    camera.updateProjectionMatrix();
+                    controls.handleResize();
+                    controls.update();
+                    renderer.render(scene, camera);
+                };
+                },
+            };
+            //Find all the diagrams and call the corresponding init functions
+            document.querySelectorAll('[data-diagram]').forEach((elem) => {
+                const sceneName = elem.dataset.diagram;
+                const sceneInitFunction = sceneInitFunctionsByName[sceneName];
+                const sceneRenderFunction = sceneInitFunction(elem);
+                addScene(elem, sceneRenderFunction);
+            });
+
+            /*
+            Makes the meshes show up in each subview
+            */
+            function render(time) {
+                time *= 0.001;
+
+                for (const {elem, fn, ctx} of sceneElements) {
+                // get the viewport relative position of this element
+                const rect = elem.getBoundingClientRect();
+                const {left, right, top, bottom, width, height} = rect;
+                const rendererCanvas = renderer.domElement;
+
+                const isOffscreen =
+                    bottom < 0 ||
+                    top > window.innerHeight ||
+                    right < 0 ||
+                    left > window.innerWidth;
+
+                if (!isOffscreen) {
+                    // make sure the renderer's canvas is big enough
+                    if (rendererCanvas.width < width || rendererCanvas.height < height) {
+                    renderer.setSize(width, height, false);
+                    }
+
+                    // make sure the canvas for this area is the same size as the area
+                    if (ctx.canvas.width !== width || ctx.canvas.height !== height) {
+                    ctx.canvas.width = width;
+                    ctx.canvas.height = height;
+                    }
+
+                    renderer.setScissor(0, 0, width, height);
+                    renderer.setViewport(0, 0, width, height);
+
+                    fn(time, rect);
+
+                    // copy the rendered scene to this element's canvas
+                    ctx.globalCompositeOperation = 'copy';
+                    ctx.drawImage(
+                        rendererCanvas,
+                        0, rendererCanvas.height - height, width, height,  // src rect
+                        0, 0, width, height);                              // dst rect
+                }
+                }
+
+                requestAnimationFrame(render);
+            }
+
+            requestAnimationFrame(render);
+        }
+
+    main();
+
+    </script>
+    </body>
+</html>
