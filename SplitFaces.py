@@ -1,7 +1,7 @@
 from IO import read
 def splitFaces(f='cube_twist.obj.HYBRID'):
     """
-    Argument: 
+    Parameter: 
     The name of a hybrid file. If none is provided, the cube twist object is used as a default view
 
     Returns: A 3D matrix with the shape (number of edges,2,3). 
