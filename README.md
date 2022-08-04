@@ -8,8 +8,8 @@ Polygon meshes are just a collection of vertices, edges, and faces that make up 
 ## How to Use
 
 - Download the code and rename the file to anything of your choice. For demonstration purposes, I have my file located at the following path: C:\Users\John Tian\MeshVisualizer.
-- This project requires the use of Python packages such as Flask, which is accounted for in requirements.txt. Threejs is used to generate the mesh visualizations. The necessary packages are already in the static folder.
-- Once you have entered the MeshVisualizer directory, run the app.py file as shown below. This should open up a local host server which you will then navigate to.  
+- This project requires the use of Python packages such as Flask, which are accounted for in requirements.txt. Threejs is used to generate the mesh visualizations. The necessary JavaScript packages are already in the static folder.
+- Once you have entered the MeshVisualizer directory, run the app.py file as shown below. This should open up a localhost server which you will then navigate to.  
 ![image](https://user-images.githubusercontent.com/85849926/182731303-031b7d38-56e8-4596-8394-7e0f57328a95.png)
 - This is what the site currently looks like: 
 ![image](https://user-images.githubusercontent.com/85849926/182731510-b563be80-3f5e-40d0-b4a4-61dc20f9cd8a.png)
