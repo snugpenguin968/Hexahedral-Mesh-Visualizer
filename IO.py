@@ -2,7 +2,7 @@ import numpy as np
 def read(f):
     with open(f) as file:
         """
-        Argument: 
+        Parameter: 
         The name of a Hybrid File. Cube_twist.obj is used as the default. 
 
         Returns: 
