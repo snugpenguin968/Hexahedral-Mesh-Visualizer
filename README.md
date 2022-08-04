@@ -11,7 +11,7 @@ Polygon meshes are just a collection of vertices, edges, and faces that make up 
 - This project requires the use of Python packages such as Flask, which are accounted for in requirements.txt. Threejs is used to generate the mesh visualizations. The necessary JavaScript packages are already in the static folder.
 - Once you have entered the MeshVisualizer directory, run the app.py file as shown below. This should open up a localhost server which you will then navigate to.  
 ![image](https://user-images.githubusercontent.com/85849926/182731303-031b7d38-56e8-4596-8394-7e0f57328a95.png)
-- This is what the site currently looks like: 
+- This is the site's default view: 
 ![image](https://user-images.githubusercontent.com/85849926/182731510-b563be80-3f5e-40d0-b4a4-61dc20f9cd8a.png)
 - There is a basic UI that allows the user to input their own hybrid files. The inputted files must be in the following format: 
   - The 1st line must contain the number of vertices, faces, and polyhedra. 
@@ -19,6 +19,8 @@ Polygon meshes are just a collection of vertices, edges, and faces that make up 
   - There are then n_faces lines. Each will first have a number *f* that represents how many vertices make up each face. *f* space separated values follow *f* in the same line. 
   - Finally, there are n_polyhedra lines. Each will first have a number *p* that represents how many faces make up each polyhedra. *p* space separated values follow *p* in the same line. 
   - **See cube_twist.obj.HYBRID or fandisk-comp.obj.HYBRID** as examples. 
+- This is the result of uploading the fandisk file:
+![image](https://user-images.githubusercontent.com/85849926/182737280-2e9f6d38-5095-4207-97e8-7d8a3f28c06e.png)
 
 ## Code Information
 
