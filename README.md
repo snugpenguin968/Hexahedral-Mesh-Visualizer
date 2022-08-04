@@ -22,7 +22,7 @@ Polygon meshes are just a collection of vertices, edges, and faces that make up 
 
 ## Code Information
 
--**app.py** sets up the Flask framework. It passes and receives data to and from the frontend and backend. 
+- **app.py** sets up the Flask framework. It passes and receives data to and from the frontend and backend. 
 - **IO.py** reads in a hybrid file (cube_twist is used as a default) and returns 3 lists representing the vertices, faces, and polyhedra of the file. It also counts the number of pure hexahedral polygons there are in the file. 
 - **SplitFaces.py** splits the list of faces into a 3D matrix of edges that can be visualized by Threejs. 
 - **templates/index.html** contains all of the HTML, CSS, and JavaScript that renders the meshes. 
