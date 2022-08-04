@@ -19,6 +19,7 @@ def read(f):
         for i in range(int(n_polyhedra/3)):
             polyhedra.append([*map(int,file.readline().split())][1:])
             poly_orientation.append([*map(int,file.readline().split())][1:])
+        #Count the number of hexahedral polyhedra
         count_hexa=0
         for poly in polyhedra:
             flag=True
