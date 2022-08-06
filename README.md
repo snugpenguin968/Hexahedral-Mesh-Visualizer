@@ -3,7 +3,7 @@
 
 ## About
 
-Polygon meshes are just a collection of vertices, edges, and faces that make up a 3D object. The concept sounds simple but they are ubiquitous in computer graphics and modeling, finding applications in subjects such as engineering simulations. To contribute to this important field, I am making a site under the guidance of Associate Professor Guoning Chen and PhD Student Lei Si (University of Houston) to visualize the quality of hexahedral meshes. This is a work in progress.
+Polygon meshes are just a collection of vertices, edges, and faces that make up a 3D object. The concept sounds simple but they are ubiquitous in computer graphics and modeling, finding applications in subjects such as engineering simulations. To contribute to this important field, I am making a site under the guidance of Associate Professor Guoning Chen and PhD Student Lei Si (University of Houston) to analyze and visualize the quality of hexahedral meshes. This is a work in progress.
 
 ## How to Use
 
