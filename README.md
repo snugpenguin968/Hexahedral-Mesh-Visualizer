@@ -13,7 +13,7 @@ Polygon meshes are just a collection of vertices, edges, and faces that make up 
 ![image](https://user-images.githubusercontent.com/85849926/182731303-031b7d38-56e8-4596-8394-7e0f57328a95.png)
 - This is the site's default view: 
 ![image](https://user-images.githubusercontent.com/85849926/182731510-b563be80-3f5e-40d0-b4a4-61dc20f9cd8a.png)
-- There is a basic UI that allows the user to input their own hybrid files. The inputted files must be in the following format: 
+- There is a basic UI that allows the user to input their own hybrid files. **The file that you want to upload must be in the MeshVisualizer directory. I will figure out how to pass raw file data eventually.** The inputted files must be in the following format: 
   - The 1st line must contain the number of vertices, faces, and polyhedra. 
   - The next n_vertices lines contain 3 space-separated values that represent the x,y, and z coordinates of each vertex. 
   - There are then n_faces lines. Each will first have a number *f* that represents how many vertices make up each face. *f* space separated values follow *f* in the same line. 
