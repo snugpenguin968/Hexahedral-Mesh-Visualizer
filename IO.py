@@ -2,7 +2,7 @@ import numpy as np
 def read(f):
     with open(f) as file:
         """
-        Parameter: 
+        Argument: 
         The name of a Hybrid File. Cube_twist.obj is used as the default. 
 
         Returns: 
@@ -19,7 +19,6 @@ def read(f):
         for i in range(int(n_polyhedra/3)):
             polyhedra.append([*map(int,file.readline().split())][1:])
             poly_orientation.append([*map(int,file.readline().split())][1:])
-        #Count the number of hexahedral polyhedra
         count_hexa=0
         for poly in polyhedra:
             flag=True
@@ -29,4 +28,4 @@ def read(f):
                         flag=False
                 if flag:
                     count_hexa+=1
-        return vertices,faces,polyhedra
+        return vertices,faces,polyhedra,n_vertices,n_faces,n_polyhedra
