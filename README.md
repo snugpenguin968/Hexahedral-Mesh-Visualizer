@@ -12,7 +12,7 @@ Polygon meshes are just a collection of vertices, edges, and faces that make up 
 - Once you have entered the MeshVisualizer directory, run the app.py file as shown below. This should open up a localhost server which you will then navigate to.  
 ![image](https://user-images.githubusercontent.com/85849926/182731303-031b7d38-56e8-4596-8394-7e0f57328a95.png)
 - This is the site's default view: 
-![image](https://user-images.githubusercontent.com/85849926/182731510-b563be80-3f5e-40d0-b4a4-61dc20f9cd8a.png)
+![image](https://user-images.githubusercontent.com/85849926/204103702-bf9e14c9-6693-4424-bcb3-833b61f1108b.png)
 - There is a basic UI that allows the user to input their own hybrid files. **The file that you want to upload must be in the MeshVisualizer directory. I will figure out how to pass raw file data eventually.** The inputted files must be in the following format: 
   - The 1st line must contain the number of vertices, faces, and polyhedra. 
   - The next n_vertices lines contain 3 space-separated values that represent the x,y, and z coordinates of each vertex. 
@@ -20,7 +20,7 @@ Polygon meshes are just a collection of vertices, edges, and faces that make up 
   - Finally, there are n_polyhedra lines. Each will first have a number *p* that represents how many faces make up each polyhedra. *p* space separated values follow *p* in the same line. 
   - **See cube_twist.obj.HYBRID or fandisk-comp.obj.HYBRID** as examples. 
 - This is the result of uploading the fandisk file:
-![image](https://user-images.githubusercontent.com/85849926/182737280-2e9f6d38-5095-4207-97e8-7d8a3f28c06e.png)
+![image](https://user-images.githubusercontent.com/85849926/204103769-8d04d070-925c-424e-b7a0-e415094d16a5.png)
 
 ## Code Information
 
