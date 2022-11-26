@@ -1,7 +1,7 @@
 from IO import read
 def splitFaces(f='cube_twist.obj.HYBRID'):
     """
-    Parameter: 
+    Argument: 
     The name of a hybrid file. If none is provided, the cube twist object is used as a default view
 
     Returns: A 3D matrix with the shape (number of edges,2,3). 
@@ -10,8 +10,7 @@ def splitFaces(f='cube_twist.obj.HYBRID'):
     """
 
     #Read the input
-    vertices,faces,polyhedra=read(f)
-
+    vertices,faces,polyhedra,n_vertices,n_faces,n_polyhedra=read(f)
     edge_mat=[]
     for face in faces:
         n=len(face)
@@ -22,4 +21,5 @@ def splitFaces(f='cube_twist.obj.HYBRID'):
             if edge not in edge_mat:
                 edge_mat.append(edge)
 
-    return edge_mat
+
+    return edge_mat,vertices,faces,polyhedra,n_vertices,n_faces,n_polyhedra
