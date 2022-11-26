@@ -14,6 +14,11 @@
             display: block;
             overflow:hidden;
         }
+        body{
+            background-color:  #eee;
+            right:0;
+ 
+        }
         *{
             font-family: 'Open Sans', sans-serif;
         }
@@ -21,63 +26,356 @@
             color: transparent;
             }
         
+        
         .tl{
-            float:left;
-            width:55%;
-            position:fixed;
+            background-color: white;
             
-            left:5%;
-            height:100%;
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
+
+            width:50%;
+            
+            
+            left:21.7%;
+            height:96%; /*98.7*/
+            border:solid;
+            border-radius:5px;
+            border-width:5px;
+            border-color: white;
+            
+        }
+        .tr{
+            margin: 0;
+            position: absolute;
+            top: 13.1%;
+            -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
+
+            background-color: white;
+            position:fixed;
+            float:right;
+            left:73.5%;
+            /*width:30%;*/
+            height:22%;
+            width:25%;
+            border:solid;
+            border-radius:5px;
+            border-width:5px;
+            border-color: white;
             
         }
         .cr{
+
+            margin: 0;
+            position: absolute;
+            top: 38%;
+            -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
+
+            background-color: white;
             position:fixed;
             float:right;
-            left:65%;
-            /*width:30%;*/
-           
-            top:5%;
+            width:25%;
+            left:73.5%;
+            
+            height:22%;
+            border:solid;
+            border-radius:5px;
+            border-width:5px;
+            border-color: white;
         }
         .br{
-            float:right;
+            margin: 0;
+            position: absolute;
+            top: 63%;
+            -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
+
+            background-color: white;   
             position:fixed;
-            /*width:30%;*/
-            left:65%;
-            top:40%;
-        }
-        .tr{
             float:right;
-            position:fixed;
-            /*width:30%;*/
-            left:65%;
-            top:75%;
+            width:25%;
+            left:73.5%;
+           
+            height:22%;
+            border:solid;
+            border-radius:5px;
+            border-width:5px;
+            border-color: white;
+            
 
         }
         
+        
         .sidenav {
-            width: 130px;
+            width: 19%;
             position: fixed;
-            z-index: 1;
-            top: 20px;
-            left: 10px;
+            height:45%;
             background: #eee;
             overflow-x: hidden;
-            padding: 8px 0;
-            float:right;
-            left:90%;
-            top:40%;
+            
+            margin-top:0;
+            left:0.25%;
+            
+        
             }
             .sidenav form{
-                padding: 6px 8px 6px 16px;
-                text-decoration: none;
-                font-size: 25px;
-                color: #2196F3;
-                display: block;
+                
+                margin-left:15%;
+                
             }
+            .sidenav label{
+                top:5%;
+                font-size: larger;
+                position:absolute;
+                text-align:center;
+                left:-1%;
+
+                width:100%;
+                font-size:25px;
+                color: #2196F3;
+            }
+            .sidenav input{
+                position:fixed;
+                position:absolute;
+                
+                top:40%;
+            }
+            .sidenav button{
+                display:block;
+                position:absolute;
+                
+                top:60%;
+            }
+            
+            
+            #chart-container1 {
+                background-color: white;
+                position: fixed;
+                height:22%;
+                width:19%;
+                overflow: hidden;
+                left:1%;
+                
+                border:solid;
+                border-color: white;
+                border-radius:5px;
+                border-width:5px;
+
+                margin: 0;
+                position: absolute;
+                top: 87%;
+                -ms-transform: translateY(-50%);
+                transform: translateY(-50%);
+                
+                
+            }
+            #chart-container2 {
+                background-color: white;
+                position: fixed;
+                height:22%;
+                width:19%;
+                overflow: hidden;
+                left:1%;
+                
+                border:solid;
+                border-color: white;
+                border-radius:5px;
+                border-width:5px;
+                margin: 0;
+                position: absolute;
+                top: 60%;
+                -ms-transform: translateY(-50%);
+                transform: translateY(-50%);
+                
+            }
+            #chart-container3 {
+                background-color: white;
+                position: fixed;
+                height:21.35%;
+                width:25%;
+                overflow: hidden;
+                left:73.5%;
+                
+                border:solid;
+                border-color: white;
+                border-radius:5px;
+                border-width:5px;
+                margin: 0;
+                position: absolute;
+                top: 87.4%;
+                -ms-transform: translateY(-50%);
+                transform: translateY(-50%);
+                
+               
+            }
+            
     </style>
 </head>
 
 <body>
+    <div id="chart-container1"></div>
+    <div id="chart-container2"></div>
+    <div id="chart-container3"></div>
+    <script src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <script>
+        var chartDom = document.getElementById('chart-container1');
+        var myChart = echarts.init(chartDom);
+        var option;
+        var edge_mat={{name|tojson}}[0]; //Read in the edge matrix from Python
+        var vertices={{name|tojson}}[1];
+        var n_vertices=vertices.length;
+        //var n_vertices={{name|tojson}}[2];
+        const xVals = [];
+        const ScaledJacobian=[];
+        for(let i=0;i<n_vertices;i++){
+            xVals.push(i);
+            ScaledJacobian.push(Math.random()*2-1)
+        }
+        option = {
+        title: {
+            text: "Scaled Jacobian",
+            left: 10
+        },
+        toolbox: {
+            feature: {
+            dataZoom: {
+                //yAxisIndex: false
+            },
+            saveAsImage: {
+                pixelRatio: 3
+            }
+            }
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+            type: 'shadow'
+            }
+        },
+        grid: {
+            bottom:30
+        },
+        dataZoom: [
+            {
+            type: 'inside'
+            },
+            
+        ],
+        xAxis: {
+            data: xVals,
+            silent: false,
+            name:'Vertex Index',
+            nameLocation:'top',
+            splitLine: {
+            show: false
+            },
+            splitArea: {
+            show: false
+            }
+        },
+        yAxis: {
+            splitArea: {
+            //show: false
+            },
+            name:'Value',
+            },
+            series: [
+                {
+                type: 'bar',
+                data: ScaledJacobian,
+                // Set `large` for large data amount
+                large: true
+                }
+            ]
+        };
+        
+        option && myChart.setOption(option);
+
+
+        var dom = document.getElementById('chart-container2');
+        var myChart = echarts.init(dom, null, {
+        renderer: 'canvas',
+        useDirtyRect: false,
+        width:275,
+        height:170
+        });
+        var app = {};
+
+        var option;
+
+        option = {
+        xAxis: {
+            type: 'category',
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+            data: [150, 230, 224, 218, 135, 147, 260],
+            type: 'line'
+            }
+        ],
+            grid: {
+            left:40,
+            top: 10,
+            right: 0,
+            bottom: 20
+            }
+        };
+
+
+        if (option && typeof option === 'object') {
+        myChart.setOption(option);
+        }
+
+        window.addEventListener('resize', myChart.resize);
+
+        var dom = document.getElementById('chart-container3');
+        var myChart = echarts.init(dom, null, {
+        renderer: 'canvas',
+        useDirtyRect: false,
+        width:350,
+        height:165
+        });
+        var app = {};
+
+        var option;
+
+        option = {
+        xAxis: {
+            type: 'category',
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+            data: [150, 230, 224, 218, 135, 147, 260],
+            type: 'line'
+            }
+        ],
+            grid: {
+            left:40,
+            top: 10,
+            right: 0,
+            bottom: 20
+            }
+        };
+
+
+        if (option && typeof option === 'object') {
+        myChart.setOption(option);
+        }
+
+        window.addEventListener('resize', myChart.resize);
+    </script>
     
     <div class="sidenav" id="mySidebar" class="sidebar">
         
@@ -125,9 +423,11 @@
             const canvas = document.createElement('canvas');
             const renderer = new THREE.WebGLRenderer({canvas, alpha: true});
             renderer.setScissorTest(true);
-            var edge_mat={{name|tojson}}; //Read in the edge matrix from Python
+            
+            //var n_vertices={{name|tojson}}[1];
+            var n_faces={{name|tojson}}[2];
+            var n_polyhedra={{name|tojson}}[3];
             const sceneElements = [];
-
             /*
             Create a 2D rendering context for each scene
             Append its canvas to the element
@@ -147,7 +447,7 @@
                 const near = 0.1;
                 const far = 5;
                 var camera = new THREE.PerspectiveCamera(25, window.innerWidth / window.innerHeight, 1, 2000);
-                camera.position.set(0, 0, 15); //How far away the camera is from the mesh
+                camera.position.set(0, 0, 30); //How far away the camera is from the mesh
                 camera.lookAt(0, 0, 0);
                 scene.add(camera);
 
@@ -185,12 +485,28 @@
                         scene.add( line );
 
                         //Generate spheres centered at each vertex (Week 5 task)
-                        var sphere = new THREE.Mesh( new THREE.SphereGeometry( 0.05), new THREE.MeshLambertMaterial( { color: 0x000000, shading: THREE.FlatShading, overdraw: true, wireframe:false } ) );
+                        /*
+                        var sphere = new THREE.Mesh( new THREE.SphereGeometry(Math.abs(ScaledJacobian[x]/10)), new THREE.MeshLambertMaterial( { color: 0x808080
+, shading: THREE.FlatShading, overdraw: true, wireframe:false } ) );
                         sphere.position.x=start_v[0];
                         sphere.position.y=start_v[1];
                         sphere.position.z=start_v[2];
                         scene.add( sphere );
+                        */
+
                 }
+                
+                for(var x=0;x<vertices.length;x++){
+                    var sphere = new THREE.Mesh( new THREE.SphereGeometry(Math.abs(ScaledJacobian[x]/10)), new THREE.MeshLambertMaterial( { color: 0x808080
+                    , shading: THREE.FlatShading, overdraw: true, wireframe:false } ) );
+                    var temp_v=vertices[x]
+                    sphere.position.x=temp_v[0];
+                    sphere.position.y=temp_v[1];
+                    sphere.position.z=temp_v[2];
+                    scene.add( sphere );
+                }
+                
+                
                 //Returns a scene render function
                 return (time, rect) => {
                     camera.aspect = rect.width / rect.height;
