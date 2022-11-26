@@ -12,12 +12,17 @@ def index():
         input_file=request.form['fileToUpload']
         
         if input_file:
-            edge_mat=splitFaces(input_file)
+            edge_mat,vertices,faces,polyhedra,n_vertices,n_faces,n_polyhedra=splitFaces(input_file)
     
     else:
         #Use default cube object as the view
-        edge_mat=splitFaces()
+        edge_mat,vertices,faces,polyhedra,n_vertices,n_faces,n_polyhedra=splitFaces()
     #Pass python data to javascript
+    edge_mat=[edge_mat]
+    edge_mat.append(vertices)
+    edge_mat.append(n_vertices)
+    edge_mat.append(n_faces)
+    edge_mat.append(n_polyhedra)
     return render_template('index.html',name=edge_mat)
 
 if __name__ == "__main__":
