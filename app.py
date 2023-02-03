@@ -20,9 +20,8 @@ def index():
     #Pass python data to javascript
     edge_mat=[edge_mat]
     edge_mat.append(vertices)
-    edge_mat.append(n_vertices)
-    edge_mat.append(n_faces)
-    edge_mat.append(n_polyhedra)
+    edge_mat.append(faces)
+    edge_mat.append(polyhedra)
     return render_template('index.html',name=edge_mat)
 
 if __name__ == "__main__":
