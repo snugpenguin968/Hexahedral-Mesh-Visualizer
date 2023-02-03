@@ -151,7 +151,10 @@
                 top:60%;
             }
             
-            
+            #gui{
+                
+        
+            }
             #chart-container1 {
                 background-color: white;
                 position: fixed;
@@ -220,6 +223,7 @@
     <div id="chart-container1"></div>
     <div id="chart-container2"></div>
     <div id="chart-container3"></div>
+    <div id="gui"></div>
     <script src="https://fastly.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
     <script>
         var chartDom = document.getElementById('chart-container1');
@@ -228,7 +232,8 @@
         var edge_mat={{name|tojson}}[0]; //Read in the edge matrix from Python
         var vertices={{name|tojson}}[1];
         var n_vertices=vertices.length;
-        //var n_vertices={{name|tojson}}[2];
+        var faces={{name|tojson}}[2];
+        var n_faces=faces.length;
         const xVals = [];
         const ScaledJacobian=[];
         for(let i=0;i<n_vertices;i++){
@@ -377,15 +382,15 @@
         window.addEventListener('resize', myChart.resize);
     </script>
     
-    <div class="sidenav" id="mySidebar" class="sidebar">
+    <!--<div class="sidenav" id="mySidebar" class="sidebar">
         
-        <!--Send data from the uploaded file to the Python functions and generate new meshes-->
+      
         <form method="post" action="{{url_for('index')}}">
             <label for="file" class="custom-uploader">Upload File</label>
             <input id="file" type="file" name="fileToUpload">
             <button type="submit" name="submit" class="btn btn-success">Submit</button>
         </form>
-    </div>
+    </div>-->
     
     
     <div class="container">
@@ -411,22 +416,89 @@
       }
     }</script><!-- Remove this when import maps will be widely supported -->
     <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.17"></script>
+    <script>
+        var GUI = lil.GUI;
+    </script>
     <script type="module">
-        import * as THREE from 'three';
+        import * as THREE from 'three';        
         import {TrackballControls} from 'https://threejs.org/examples/jsm/controls/TrackballControls.js'; //This package allows us to zoom and drag the camera
-        
+        let planes, planeObjects, planeHelpers;
+        let object,stats;
+        const params = {
+
+            animate: true,
+            planeX: {
+
+                constant: 1,
+                negated: false,
+                displayHelper: false
+
+            },
+            planeY: {
+
+                constant: 1,
+                negated: false,
+                displayHelper: false
+
+            },
+            planeZ: {
+
+                constant: 1,
+                negated: false,
+                displayHelper: false
+
+            }
+
+
+        };
+        function createPlaneStencilGroup( geometry, plane, renderOrder ) {
+
+            const group = new THREE.Group();
+            const baseMat = new THREE.MeshBasicMaterial();
+            baseMat.depthWrite = false;
+            baseMat.depthTest = false;
+            baseMat.colorWrite = false;
+            baseMat.stencilWrite = true;
+            baseMat.stencilFunc = THREE.AlwaysStencilFunc;
+
+            // back faces
+            const mat0 = baseMat.clone();
+            mat0.side = THREE.BackSide;
+            mat0.clippingPlanes = [ plane ];
+            mat0.stencilFail = THREE.IncrementWrapStencilOp;
+            mat0.stencilZFail = THREE.IncrementWrapStencilOp;
+            mat0.stencilZPass = THREE.IncrementWrapStencilOp;
+
+            const mesh0 = new THREE.Mesh( geometry, mat0 );
+            mesh0.renderOrder = renderOrder;
+            group.add( mesh0 );
+
+            // front faces
+            const mat1 = baseMat.clone();
+            mat1.side = THREE.FrontSide;
+            mat1.clippingPlanes = [ plane ];
+            mat1.stencilFail = THREE.DecrementWrapStencilOp;
+            mat1.stencilZFail = THREE.DecrementWrapStencilOp;
+            mat1.stencilZPass = THREE.DecrementWrapStencilOp;
+
+            const mesh1 = new THREE.Mesh( geometry, mat1 );
+            mesh1.renderOrder = renderOrder;
+
+            group.add( mesh1 );
+
+            return group;
+
+        }
         /*
         Creates and renders all of the meshes
         */
         function main() {
             //Create the canvas that the meshes are rendered on. 
             const canvas = document.createElement('canvas');
-            const renderer = new THREE.WebGLRenderer({canvas, alpha: true});
+            const renderer = new THREE.WebGLRenderer({canvas, alpha: true,antialias: true});
+            renderer.shadowMap.enabled = true;
             renderer.setScissorTest(true);
-            
-            //var n_vertices={{name|tojson}}[1];
-            var n_faces={{name|tojson}}[2];
-            var n_polyhedra={{name|tojson}}[3];
             const sceneElements = [];
             /*
             Create a 2D rendering context for each scene
@@ -456,15 +528,17 @@
                 controls.noPan = false; //Enable click+drag
 
                 {
-                const color = 0xFFFFFF;
+                scene.add( new THREE.AmbientLight( 0xffffff, 0.5 ) );
+                const color = 0xffffff;
                 const intensity = 1;
                 const light = new THREE.DirectionalLight(color, intensity); 
                 light.position.set(-1, 2, 4);
+
                 camera.add(light); //Keeps light relative to camera -> light shines on the side of the object we are looking at
                 }
-
                 return {scene, camera, controls};
             }
+            
             /*
             Create the meshes in each of the 4 subviews using the edge matrix. Each subview corresponds to an HTML span tag. 
             */
@@ -473,28 +547,19 @@
                 'MainView': (elem) => {
                 const {scene, camera, controls} = makeScene(elem); //Each subview has its camera and controls
                 const material = new THREE.LineBasicMaterial( { color: 0xfffff } ); //Set light blue color
+                const points = [];
                 for(var x=0;x<edge_mat.length;x++){
-                        const points = [];
-                        var temp_edge=edge_mat[x]; //Iterate through the edge matrix and retrieve each edge
-                        var start_v=temp_edge[0]; //Start vertex of edge
-                        var end_v=temp_edge[1]; //End vertex of edge
-                        points.push(new THREE.Vector3(start_v[0],start_v[1],start_v[2])); //Define the coordinates of the start and end vertices
+                        
+                        var temp_edge=edge_mat[x];
+                        var start_v=temp_edge[0];
+                        var end_v=temp_edge[1];
+                        points.push(new THREE.Vector3(start_v[0],start_v[1],start_v[2]));
                         points.push(new THREE.Vector3(end_v[0],end_v[1],end_v[2]));
-                        const geometry = new THREE.BufferGeometry().setFromPoints( points );
-                        const line = new THREE.Line( geometry, material ); //Create a line that connects the 2 vertices; this represents an edge
-                        scene.add( line );
-
-                        //Generate spheres centered at each vertex (Week 5 task)
-                        /*
-                        var sphere = new THREE.Mesh( new THREE.SphereGeometry(Math.abs(ScaledJacobian[x]/10)), new THREE.MeshLambertMaterial( { color: 0x808080
-, shading: THREE.FlatShading, overdraw: true, wireframe:false } ) );
-                        sphere.position.x=start_v[0];
-                        sphere.position.y=start_v[1];
-                        sphere.position.z=start_v[2];
-                        scene.add( sphere );
-                        */
-
+                        
                 }
+                const geometry = new THREE.BufferGeometry().setFromPoints( points );
+                const line = new THREE.LineSegments( geometry, material );
+                scene.add( line );
                 
                 for(var x=0;x<vertices.length;x++){
                     var sphere = new THREE.Mesh( new THREE.SphereGeometry(Math.abs(ScaledJacobian[x]/10)), new THREE.MeshLambertMaterial( { color: 0x808080
@@ -506,6 +571,7 @@
                     scene.add( sphere );
                 }
                 
+				
                 
                 //Returns a scene render function
                 return (time, rect) => {
@@ -519,43 +585,204 @@
 
                 //Top Right subview
                 'TopRight': (elem) => {
-                    const {scene, camera, controls} = makeScene(elem);
-                    const material = new THREE.LineBasicMaterial( { color: 0xfffff } );
-                    for(var x=0;x<edge_mat.length;x++){
-                            const points = [];
-                            var temp_edge=edge_mat[x];
-                            var start_v=temp_edge[0];
-                            var end_v=temp_edge[1];
-                            points.push(new THREE.Vector3(start_v[0],start_v[1],start_v[2]));
-                            points.push(new THREE.Vector3(end_v[0],end_v[1],end_v[2]));
-                            const geometry = new THREE.BufferGeometry().setFromPoints( points );
-                            const line = new THREE.Line( geometry, material );
-                            scene.add( line );
+                const {scene, camera, controls} = makeScene(elem);
+                
+                const material = new THREE.LineBasicMaterial( { color: 0xfffff } );
+                const points = [];
+                for(var x=0;x<edge_mat.length;x++){
+                        
+                        var temp_edge=edge_mat[x];
+                        var start_v=temp_edge[0];
+                        var end_v=temp_edge[1];
+                        points.push(new THREE.Vector3(start_v[0],start_v[1],start_v[2]));
+                        points.push(new THREE.Vector3(end_v[0],end_v[1],end_v[2]));
+                        
+                }
+                const geometry = new THREE.BufferGeometry().setFromPoints( points );
+                const line = new THREE.LineSegments( geometry, material );
+                scene.add( line );
+                
+               /*
+                var verticesOfMesh=[[1, 0, 1],
+                [1, 0, -1],
+                [-1, 0, -1],
+                [-1, 0, 1],
+                [0, 1, 0]];
+                var facesOfMesh=[[0, 1, 2, 3],
+            [0, 1, 4],
+            [1, 2, 4],
+            [2, 3, 4],
+            [3, 0, 4]];
+                
+                for(var x=0;x<vertices.length;x++){
+                    verticesOfMesh.push(vertices[x]);
+                }
+                for(var x=0;x<faces.length;x++){
+                    facesOfMesh.push(faces[x]);
+                }
+                function createMesh(geom) {
+
+                    // assign two materials
+                    var meshMaterial = new THREE.MeshNormalMaterial();
+                    meshMaterial.side = THREE.DoubleSide;
+                    var wireFrameMat = new THREE.MeshBasicMaterial();
+                    wireFrameMat.wireframe = true;
+
+                    // create a multimaterial
+                    var mesh = THREE.SceneUtils.createMeshesFromMultiMaterialMesh (geom, [meshMaterial, wireFrameMat]);
+
+                    return mesh;
+                }
+                const geometry= createMesh(new THREE.PolyhedronGeometry(vertices, faces));
+                scene.add(geometry);*/
+                /*
+                Set up planes for slicing in the x, y, and z directions
+                */
+                planes=[
+                        new THREE.Plane(new THREE.Vector3(-1,0,0),1),
+                        new THREE.Plane(new THREE.Vector3(0,-1,0),1),
+                        new THREE.Plane(new THREE.Vector3(0,0,-1),1)
+                ];
+                planeHelpers=planes.map(p=>new THREE.PlaneHelper(p,2,0xfffff));
+                planeHelpers.forEach(ph=>{
+                    ph.visible=false;
+                    scene.add(ph);
+                });
+                //const geometry = new THREE.TorusKnotGeometry( 0.4, 0.15, 220, 60 );
+                object = new THREE.Group();
+				scene.add( object );
+                // Set up clip plane rendering
+				planeObjects = [];
+				const planeGeom = new THREE.PlaneGeometry( 4, 4 );
+
+				for ( let i = 0; i < 3; i ++ ) {
+
+					const poGroup = new THREE.Group();
+					const plane = planes[ i ];
+					const stencilGroup = createPlaneStencilGroup( geometry, plane, i + 1 );
+
+					// plane is clipped by the other clipping planes
+					const planeMat =
+						new THREE.MeshStandardMaterial( {
+
+							color: 0xE91E63,
+							metalness: 0.1,
+							roughness: 0.75,
+							clippingPlanes: planes.filter( p => p !== plane ),
+
+							stencilWrite: true,
+							stencilRef: 0,
+							stencilFunc: THREE.NotEqualStencilFunc,
+							stencilFail: THREE.ReplaceStencilOp,
+							stencilZFail: THREE.ReplaceStencilOp,
+							stencilZPass: THREE.ReplaceStencilOp,
+
+						} );
+					const po = new THREE.Mesh( planeGeom, planeMat );
+					po.onAfterRender = function ( renderer ) {
+
+						renderer.clearStencil();
+
+					};
+
+					po.renderOrder = i + 1.1;
+
+					object.add( stencilGroup );
+					poGroup.add( po );
+					planeObjects.push( po );
+					scene.add( poGroup );
+
+				}
+                const m = new THREE.MeshStandardMaterial( {
+
+                    color: 0xFFC107,
+                    metalness: 0.1,
+                    roughness: 0.75,
+                    clippingPlanes: planes,
+                    clipShadows: true,
+                    shadowSide: THREE.DoubleSide,
+
+                } );
+                const clippedColorFront = new THREE.Mesh( geometry, m );
+				clippedColorFront.castShadow = true;
+				clippedColorFront.renderOrder = 6;
+				object.add( clippedColorFront );
+                
+                renderer.localClippingEnabled = true;
+                const gui = new GUI({ container: document.getElementById( 'gui' ),width:280 });
+				gui.add( params);
+                const planeX = gui.addFolder( 'planeX' );
+				planeX.add( params.planeX, 'displayHelper' ).onChange( v => planeHelpers[ 0 ].visible = v );
+				planeX.add( params.planeX, 'constant' ).min( - 1 ).max( 1 ).onChange( d => planes[ 0 ].constant = d );
+				planeX.add( params.planeX, 'negated' ).onChange( () => {
+
+					planes[ 0 ].negate();
+					params.planeX.constant = planes[ 0 ].constant;
+
+				} );
+
+				planeX.open();
+
+				const planeY = gui.addFolder( 'planeY' );
+				planeY.add( params.planeY, 'displayHelper' ).onChange( v => planeHelpers[ 1 ].visible = v );
+				planeY.add( params.planeY, 'constant' ).min( - 1 ).max( 1 ).onChange( d => planes[ 1 ].constant = d );
+				planeY.add( params.planeY, 'negated' ).onChange( () => {
+
+					planes[ 1 ].negate();
+					params.planeY.constant = planes[ 1 ].constant;
+
+				} );
+				planeY.open();
+
+				const planeZ = gui.addFolder( 'planeZ' );
+				planeZ.add( params.planeZ, 'displayHelper' ).onChange( v => planeHelpers[ 2 ].visible = v );
+				planeZ.add( params.planeZ, 'constant' ).min( - 1 ).max( 1 ).onChange( d => planes[ 2 ].constant = d );
+				planeZ.add( params.planeZ, 'negated' ).onChange( () => {
+
+					planes[ 2 ].negate();
+					params.planeZ.constant = planes[ 2 ].constant;
+
+				} );
+				planeZ.open();
+                
+                return (time, rect) => {
+                    for ( let i = 0; i < planeObjects.length; i ++ ) {
+
+                        const plane = planes[ i ];
+                        const po = planeObjects[ i ];
+                        plane.coplanarPoint( po.position );
+                        po.lookAt(
+                            po.position.x - plane.normal.x,
+                            po.position.y - plane.normal.y,
+                            po.position.z - plane.normal.z,
+                        );
+
                     }
-                    return (time, rect) => {
-                        camera.aspect = rect.width / rect.height;
-                        camera.updateProjectionMatrix();
-                        controls.handleResize();
-                        controls.update();
-                        renderer.render(scene, camera);
-                    };
+                    camera.aspect = rect.width / rect.height;
+                    camera.updateProjectionMatrix();
+                    controls.handleResize();
+                    controls.update();
+                    renderer.render(scene, camera);
+                };
                 },
 
                 //Center Right Subview
                 'CenterRight': (elem) => {
                 const {scene, camera, controls} = makeScene(elem);
                 const material = new THREE.LineBasicMaterial( { color: 0xfffff } );
+                const points = [];
                 for(var x=0;x<edge_mat.length;x++){
-                        const points = [];
+                        
                         var temp_edge=edge_mat[x];
                         var start_v=temp_edge[0];
                         var end_v=temp_edge[1];
                         points.push(new THREE.Vector3(start_v[0],start_v[1],start_v[2]));
                         points.push(new THREE.Vector3(end_v[0],end_v[1],end_v[2]));
-                        const geometry = new THREE.BufferGeometry().setFromPoints( points );
-                        const line = new THREE.Line( geometry, material );
-                        scene.add( line );
+                        
                 }
+                const geometry = new THREE.BufferGeometry().setFromPoints( points );
+                const line = new THREE.LineSegments( geometry, material );
+                scene.add( line );
                 return (time, rect) => {
                     camera.aspect = rect.width / rect.height;
                     camera.updateProjectionMatrix();
@@ -569,17 +796,19 @@
                 'BottomRight': (elem) => {
                 const {scene, camera, controls} = makeScene(elem);
                 const material = new THREE.LineBasicMaterial( { color: 0xfffff } );
+                const points = [];
                 for(var x=0;x<edge_mat.length;x++){
-                        const points = [];
+                        
                         var temp_edge=edge_mat[x];
                         var start_v=temp_edge[0];
                         var end_v=temp_edge[1];
                         points.push(new THREE.Vector3(start_v[0],start_v[1],start_v[2]));
                         points.push(new THREE.Vector3(end_v[0],end_v[1],end_v[2]));
-                        const geometry = new THREE.BufferGeometry().setFromPoints( points );
-                        const line = new THREE.Line( geometry, material );
-                        scene.add( line );
+                        
                 }
+                const geometry = new THREE.BufferGeometry().setFromPoints( points );
+                const line = new THREE.LineSegments( geometry, material );
+                scene.add( line );
                 return (time, rect) => {
                     camera.aspect = rect.width / rect.height;
                     camera.updateProjectionMatrix();
